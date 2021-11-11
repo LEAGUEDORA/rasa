@@ -1,7 +1,7 @@
 import itertools
 import logging
 from collections import defaultdict
-from typing import Set, Text, Optional, Dict, Any
+from typing import Set, Text, Optional, Dict, Any, List
 
 import rasa.core.training.story_conflict
 import rasa.shared.nlu.constants
@@ -59,18 +59,20 @@ class Validator:
 
         return cls(domain, intents, story_graph, config)
 
+    def _non_default_intents(self) -> List[Text]:
+        return [
+            item
+            for item in self.domain.intents
+            if item not in constants.DEFAULT_INTENTS
+        ]
+
     def verify_intents(self, ignore_warnings: bool = True) -> bool:
         """Compares list of intents in domain with intents in NLU training data."""
         everything_is_alright = True
 
         nlu_data_intents = {e.data["intent"] for e in self.intents.intent_examples}
 
-        # Exclude the default intents that are always implicitly present
-        for intent in [
-            item
-            for item in self.domain.intents
-            if item not in constants.DEFAULT_INTENTS
-        ]:
+        for intent in self._non_default_intents():
             if intent not in nlu_data_intents:
                 rasa.shared.utils.io.raise_warning(
                     f"The intent '{intent}' is listed in the domain file, but "
@@ -140,12 +142,7 @@ class Validator:
                 )
                 everything_is_alright = False
 
-        # Exclude the default intents that are always implicitly present
-        for intent in [
-            item
-            for item in self.domain.intents
-            if item not in constants.DEFAULT_INTENTS
-        ]:
+        for intent in self._non_default_intents():
             if intent not in stories_intents:
                 rasa.shared.utils.io.raise_warning(
                     f"The intent '{intent}' is not used in any story or rule."

@@ -1,6 +1,7 @@
 from typing import Text
 
 import pytest
+from _pytest.logging import LogCaptureFixture
 
 from rasa.validator import Validator
 from rasa.shared.importers.rasa import RasaFileImporter
@@ -227,7 +228,7 @@ def test_verify_there_is_example_repetition_in_intents(nlu_data_path: Text):
 
 
 def test_verify_logging_message_for_intent_not_used_in_nlu(
-    caplog, validator_under_test
+    caplog: LogCaptureFixture, validator_under_test: Validator
 ):
     caplog.clear()
     with pytest.warns(UserWarning) as record:
@@ -241,7 +242,7 @@ def test_verify_logging_message_for_intent_not_used_in_nlu(
 
 
 def test_verify_logging_message_for_intent_not_used_in_story(
-    caplog, validator_under_test
+    caplog: LogCaptureFixture, validator_under_test: Validator
 ):
     caplog.clear()
     with pytest.warns(UserWarning) as record:
@@ -252,13 +253,13 @@ def test_verify_logging_message_for_intent_not_used_in_story(
     )
 
 
-def test_verify_logging_message_for_unused_utterance(caplog, validator_under_test):
+def test_verify_logging_message_for_unused_utterance(
+    caplog: LogCaptureFixture, validator_under_test: Validator
+):
     caplog.clear()
     with pytest.warns(UserWarning) as record:
         validator_under_test.verify_utterances_in_stories(False)
 
-    for m in record:
-        print(m)
     assert "The utterance 'utter_chatter' is not used in any story or rule." in (
         m.message.args[0] for m in record
     )
