@@ -83,6 +83,7 @@ class WhitespaceTokenizer(Tokenizer):
             " ",
             text,
         ).split()
+        print(words)
 
         words = [self.remove_emoji(w) for w in words]
         words = [w for w in words if w]
